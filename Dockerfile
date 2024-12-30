@@ -79,5 +79,15 @@ ENV GROQ_API_KEY=${GROQ_API_KEY} \
     VITE_LOG_LEVEL=${VITE_LOG_LEVEL} \
     DEFAULT_NUM_CTX=${DEFAULT_NUM_CTX}
 
+RUN wget https://github.com/jmorganca/ollama/releases/download/v0.2.10/ollama-linux-amd64 -O /usr/local/bin/ollama \
+    && chmod +x /usr/local/bin/ollama
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 11434
+
+ENTRYPOINT ["/entrypoint.sh"]
+
 RUN mkdir -p ${WORKDIR}/run
 CMD pnpm run dev --host
