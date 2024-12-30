@@ -1,4 +1,16 @@
+version: '3.8'
+
 services:
+  ollama:
+    build: .
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama/models
+    environment:
+      - OLLAMA_MODEL=deepseek-coder-33B-base-GGUF
+    restart: unless-stopped
+
   app-prod:
     image: bolt-ai:production
     build:
@@ -11,7 +23,6 @@ services:
     environment:
       - NODE_ENV=production
       - COMPOSE_PROFILES=production
-      # No strictly needed but serving as hints for Coolify
       - PORT=5173
       - GROQ_API_KEY=${GROQ_API_KEY}
       - HuggingFace_API_KEY=${HuggingFace_API_KEY}
@@ -25,6 +36,7 @@ services:
       - VITE_LOG_LEVEL=${VITE_LOG_LEVEL:-debug}
       - DEFAULT_NUM_CTX=${DEFAULT_NUM_CTX:-32768}
       - RUNNING_IN_DOCKER=true
+      - LLM_API_URL=http://ollama:11434/api/generate
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command: pnpm run dockerstart
@@ -55,6 +67,7 @@ services:
       - VITE_LOG_LEVEL=${VITE_LOG_LEVEL:-debug}
       - DEFAULT_NUM_CTX=${DEFAULT_NUM_CTX:-32768}
       - RUNNING_IN_DOCKER=true
+      - LLM_API_URL=http://ollama:11434/api/generate
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
@@ -67,3 +80,6 @@ services:
       - "5173:5173"
     command: pnpm run dev --host 0.0.0.0
     profiles: ["development", "default"]
+
+volumes:
+  ollama-models:
